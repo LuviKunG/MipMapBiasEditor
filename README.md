@@ -29,12 +29,22 @@ Then merge this json format below.
 
 If you want to install the older version, please take a look at release tag in this git, then change the path after **#** to the version tag that you want.
 
-### Unity UPM Git Extension
+### Unity 2019.3 Git URL
+
+In Unity 2019.3 or greater, Package Manager is include the new feature that able to install the package via Git.
+
+![Install with Git URL](images/giturl.png)
+
+Just simply using this git URL and following with version like this example.
+
+**https://github.com/LuviKunG/MipMapBiasEditor.git#1.0.0**
+
+Make sure that you're select the latest version.
+
+### Unity UPM Git Extension (For 2019.2 and older version)
 
 If you doesn't have this package before, please redirect to this git [https://github.com/mob-sakai/UpmGitExtension](https://github.com/mob-sakai/UpmGitExtension) then follow the instruction in README.md to install the **UPM Git Extension** to your Unity.
 
 If you already installed. Open the **Package Manager UI**, you will see the git icon around the bottom left connor, Open it then follow the instruction using this git URL to perform package install.
-
-![Install LuviConsole with UPM Git Extension](images/install01.png)
 
 Make sure that you're select the latest version.
