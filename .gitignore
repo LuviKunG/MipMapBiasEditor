@@ -37,3 +37,10 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# Package lock
+Packages/packages-lock.json
+
+# Visual studio
+.vs
+.vsconfig

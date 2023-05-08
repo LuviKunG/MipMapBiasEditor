@@ -6,7 +6,7 @@ namespace LuviKunG.MipMapBias
 {
     public sealed class MipMapBiasEditor : EditorWindow
     {
-        public enum BiasLevel : int
+        public enum BiasLevel : byte
         {
             Normal,
             High,
@@ -14,7 +14,9 @@ namespace LuviKunG.MipMapBias
         }
 
         private static readonly GUIContent CONTENT_MIP_MAP_BIAS_LEVEL = new GUIContent("Mipmap Bias Level", "This will set all your selection textures mipmap bias depend on level.\nNormal = 0\nHigh = -0.5\nVery High = -1.5");
-
+        private const string KEY_MIP_MAP_BIAS_INFO = "com.luvikung.mipmapbias.showinfo";
+        private const string MESSAGE_MIP_MAP_BIAS_INFO = "Note that this editor isn't support for OpenGL ES and Metal because they should be configure mip map bias value in the shader.";
+        private const string MESSAGE_MIP_MAP_BIAS_INFO_CODE = "half4 texColor = SAMPLE_TEXTURE2D_BIAS(_BaseMap, sampler_BaseMap, uv, _Bias);";
         public static MipMapBiasEditor OpenWindowWithSelection(Object[] objects)
         {
             MipMapBiasEditor window = GetWindow<MipMapBiasEditor>(true, "Mipmap Bias", true);
@@ -27,6 +29,7 @@ namespace LuviKunG.MipMapBias
         private Texture texture;
         private Vector2 scrollview;
         private BiasLevel biasLevel;
+        private bool isShowInfo;
 
         public void SetSelection(Object[] objects)
         {
@@ -34,12 +37,38 @@ namespace LuviKunG.MipMapBias
                 list.Add(texture);
         }
 
+        private void OnEnable()
+        {
+            isShowInfo = EditorPrefs.GetBool(KEY_MIP_MAP_BIAS_INFO, true);
+        }
+
         private void OnGUI()
         {
             if (list != null && list.Count > 0)
             {
                 biasLevel = (BiasLevel)EditorGUILayout.EnumPopup(CONTENT_MIP_MAP_BIAS_LEVEL, biasLevel);
-                if (GUILayout.Button("Update Mipmap Bias"))
+                if (isShowInfo)
+                {
+                    using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                    {
+                        EditorGUILayout.LabelField(MESSAGE_MIP_MAP_BIAS_INFO, EditorStyles.wordWrappedMiniLabel);
+                        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+                        {
+                            EditorGUILayout.LabelField(MESSAGE_MIP_MAP_BIAS_INFO_CODE, EditorStyles.wordWrappedMiniLabel);
+                        }
+                        using (new EditorGUILayout.HorizontalScope())
+                        {
+                            GUILayout.FlexibleSpace();
+                            if (GUILayout.Button("I Understand", EditorStyles.miniButton, GUILayout.Width(150.0f)))
+                            {
+                                isShowInfo = false;
+                                EditorPrefs.SetBool(KEY_MIP_MAP_BIAS_INFO, false);
+                            }
+                            GUILayout.FlexibleSpace();
+                        }
+                    }
+                }
+                if (GUILayout.Button("Update Mipmap Bias", GUILayout.Height(30.0f)))
                 {
                     float currentBiasLevel = GetBiasLevelValue(biasLevel);
                     for (int i = 0; i < list.Count; i++)
@@ -48,7 +77,9 @@ namespace LuviKunG.MipMapBias
                         (AssetImporter.GetAtPath(path) as TextureImporter).mipMapBias = currentBiasLevel;
                         AssetDatabase.ImportAsset(path);
                     }
+                    AssetDatabase.SaveAssets();
                 }
+                GUILayout.Space(10.0f);
                 using (var scrollViewScope = new EditorGUILayout.ScrollViewScope(scrollview))
                 {
                     scrollview = scrollViewScope.scrollPosition;
@@ -67,13 +98,13 @@ namespace LuviKunG.MipMapBias
 
         private float GetBiasLevelValue(BiasLevel level)
         {
-            switch (level)
+            return level switch
             {
-                case BiasLevel.Normal: return 0.0f;
-                case BiasLevel.High: return -0.5f;
-                case BiasLevel.VeryHigh: return -1.5f;
-                default: return 0.0f;
-            }
+                BiasLevel.Normal => 0.0f,
+                BiasLevel.High => -0.5f,
+                BiasLevel.VeryHigh => -1.5f,
+                _ => 0.0f,
+            };
         }
     }
 }
